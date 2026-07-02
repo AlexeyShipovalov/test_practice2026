@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+X-Nemo-Application-Type=silica-qt5
+Icon=ru.repeater.repeater
+Exec=/usr/bin/ru.repeater.repeater
+Name=repeater
+Name[ru]=Ретранслятор
+
+[X-Application]
+Permissions=Microphone;Audio;Downloads
+OrganizationName=ru.repeater
+ApplicationName=repeater
+ExecDBus=/usr/bin/ru.repeater.repeater
