@@ -1,30 +1,41 @@
 import gigaam
 import torch
+import torch.nn as nn
 
-# Загружаем модель RNNT (она скачается автоматически)
-model = gigaam.load_model("rnnt")
-
-# Переводим в режим инференса
+print("Загрузка CTC модели...")
+model = gigaam.load_model("ctc")
 model.eval()
 
-# Создаем фиктивный вход для RNNT (например, 1 секунда аудио)
-# GigaAM использует 16kHz, значит 1 секунда = 16000 сэмплов.
-dummy_audio = torch.randn(1, 16000)
+# Создаем пустышку-заглушку, которая просто пропускает через себя данные без STFT
+class BypassPreprocessor(nn.Module):
+    def forward(self, mel_features, feature_lengths):
+        return mel_features, feature_lengths
 
-# Экспортируем в ONNX
-# (Внимание: в зависимости от версии gigaam API может немного отличаться, 
-# но обычно у PyTorch моделей есть метод .to_onnx или используем torch.onnx.export)
+# Хирургически подменяем проблемный блок!
+print("Подмена препроцессора (удаление STFT)...")
+model.preprocessor = BypassPreprocessor()
+
+# ВАЖНО: Используем ровно 64 Mel-коэффициента, как показал рентген!
+dummy_mel = torch.randn(1, 64, 101)
+dummy_mel_len = torch.tensor([101], dtype=torch.int64)
+
+onnx_path = "gigaam_encoder_decoder.onnx"
+
+print("Начинаем экспорт модифицированной модели в ONNX...")
 try:
-    # Пробуем стандартный метод экспорта
     torch.onnx.export(
-        model,
-        (dummy_audio,),
-        "gigaam_v3.onnx",
+        model,                              
+        (dummy_mel, dummy_mel_len),
+        onnx_path,
         opset_version=14,
-        input_names=["audio"],
-        output_names=["tokens"]
+        input_names=["mel_features", "feature_lengths"],
+        output_names=["logits"],
+        dynamic_axes={
+            "mel_features": {2: "seq_len"},   
+            "feature_lengths": {0: "batch_size"},
+            "logits": {1: "seq_len"}
+        }
     )
-    print("Модель успешно экспортирована в gigaam_v3.onnx")
+    print(f"УСПЕХ! Модель успешно сохранена в файл: {onnx_path}")
 except Exception as e:
     print(f"Ошибка экспорта: {e}")
-    print("Возможно, у GigaAM есть свой метод экспорта, смотрите их README.")

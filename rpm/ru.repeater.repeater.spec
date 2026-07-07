@@ -1,5 +1,6 @@
 %global __provides_exclude_from ^%{_datadir}/%{name}/lib/.*$
 %global __requires_exclude ^(libonnxruntime.*|libonnx.*|libprotobuf.*|libabsl.*|libkissfft.*|libXNNPACK.*|libcpuinfo.*|libnsync.*|libpthreadpool.*|libre2.*|libz.*|libdate.*)$
+%define debug_package %{nil}
 Name:       ru.repeater.repeater
 Summary:    My Aurora OS Application
 Version:    0.1

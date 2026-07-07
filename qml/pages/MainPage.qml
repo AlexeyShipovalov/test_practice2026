@@ -23,6 +23,30 @@ Page {
 
             PageHeader { title: qsTr("Мои заметки") }
 
+            Label {
+                id: modelStatusLabel
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2*Theme.horizontalPageMargin
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: sttController.isModelReady ? Theme.secondaryColor : Theme.highlightColor
+                text: qsTr("Загрузка модели...")
+                wrapMode: Text.WordWrap
+            }
+
+            Connections {
+                target: sttController
+                onModelReadyChanged: {
+                    if (sttController.isModelReady) {
+                        modelStatusLabel.text = qsTr("Модель речи готова")
+                        modelStatusLabel.color = Theme.secondaryColor
+                    }
+                }
+                onErrorOccurred: {
+                    modelStatusLabel.text = qsTr("Ошибка: ") + err
+                    modelStatusLabel.color = "red"
+                }
+            }
+
             SearchField {
                 id: searchField
                 width: parent.width
@@ -39,11 +63,11 @@ Page {
         delegate: ListItem {
             id: delegate
             width: parent.width
-            contentHeight: Theme.itemSizeMedium
+            contentHeight: visible ? Theme.itemSizeMedium : 0
 
-            // Фильтрация поиска
-            opacity: model.text.toLowerCase().includes(searchField.text.toLowerCase()) ? 1.0 : 0.0
-            visible: opacity > 0.0
+            // Правильная фильтрация поиска (без пустых строк)
+            visible: searchField.text.length === 0 ||
+                     model.text.toLowerCase().includes(searchField.text.toLowerCase())
 
             menu: ContextMenu {
                 MenuItem {
@@ -72,10 +96,56 @@ Page {
                 }
                 Label {
                     width: parent.width
-                    text: Qt.formatDateTime(Qt.parseDateTime(model.date), "dd MMM yyyy, hh:mm")
+                    // Исправлено: Qt.parseDateTime нет, используем new Date
+                    text: Qt.formatDateTime(new Date(model.date), "dd MMM yyyy, hh:mm")
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.secondaryColor
                 }
+            }
+        }
+    }
+
+    // Панель фоновой расшифровки внизу экрана
+    Item {
+        id: transcribingPanel
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: sttController.isTranscribing ? column.height + Theme.paddingLarge : 0
+        visible: sttController.isTranscribing
+        clip: true
+
+        BackgroundItem {
+            anchors.fill: parent
+            onClicked: {
+                // Отмена по тапу на панель (опционально)
+                // sttController.cancelTranscription()
+            }
+        }
+
+        Column {
+            id: column
+            width: parent.width - 2 * Theme.horizontalPageMargin
+            x: Theme.horizontalPageMargin
+            spacing: Theme.paddingSmall
+
+            Label {
+                width: parent.width
+                text: qsTr("Расшифровка записи...")
+                color: Theme.highlightColor
+            }
+
+            ProgressBar {
+                width: parent.width
+                minimumValue: 0
+                maximumValue: 100
+                value: sttController.progress
+            }
+
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Отменить")
+                onClicked: sttController.cancelTranscription()
+                color: "red"
             }
         }
     }

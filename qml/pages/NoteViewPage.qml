@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import QtMultimedia 5.0
+import QtMultimedia 5.6 // Рекомендуемая версия для Аврора
 
 Page {
     id: noteViewPage
@@ -22,10 +22,11 @@ Page {
             MenuItem {
                 text: qsTr("Экспорт в файл")
                 onClicked: {
-                    // Сохранение в Загрузки (требует Permissions=Downloads)
-                    var path = StandardPaths.download + "/export_" + Date.now() + ".txt"
-                    // Для реального сохранения потребуется C++ метод или FileIO
-                    console.log("Exporting to: " + path)
+                    // В QML нельзя просто сохранить файл.
+                    // Самый простой способ по ТЗ: скопировать в буфер обмена
+                    Clipboard.text = noteText
+                    // Либо нужен вызов C++ метода:
+                    // notesModel.exportNoteToFile(index)
                 }
             }
         }
@@ -60,10 +61,11 @@ Page {
                 maximumValue: audioPlayer.duration
                 value: audioPlayer.position
                 onValueChanged: if (pressed) audioPlayer.seek(value)
-                label: "Воспроизведение"
+                label: qsTr("Воспроизведение")
             }
 
-            Text {
+            // Исправлено Text на Label для стиля Silica
+            Label {
                 width: parent.width - 2*Theme.horizontalPageMargin
                 x: Theme.horizontalPageMargin
                 wrapMode: Text.WordWrap

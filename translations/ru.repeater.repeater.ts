@@ -27,23 +27,48 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="29"/>
+        <location filename="../qml/pages/MainPage.qml" line="40"/>
+        <source>Модель речи готова</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="32"/>
+        <source>Загрузка модели...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="45"/>
+        <source>Ошибка: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="53"/>
         <source>Поиск по тексту...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="35"/>
+        <location filename="../qml/pages/MainPage.qml" line="59"/>
         <source>Заметок нет</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="36"/>
+        <location filename="../qml/pages/MainPage.qml" line="60"/>
         <source>Создайте новую запись</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="50"/>
+        <location filename="../qml/pages/MainPage.qml" line="74"/>
         <source>Удалить</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="133"/>
+        <source>Расшифровка записи...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="146"/>
+        <source>Отменить</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -60,25 +85,35 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/NoteViewPage.qml" line="49"/>
+        <location filename="../qml/pages/NoteViewPage.qml" line="50"/>
         <source>Пауза</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/NoteViewPage.qml" line="49"/>
+        <location filename="../qml/pages/NoteViewPage.qml" line="50"/>
         <source>Слушать</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/NoteViewPage.qml" line="64"/>
+        <source>Воспроизведение</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>RecordPage</name>
     <message>
-        <location filename="../qml/pages/RecordPage.qml" line="33"/>
+        <location filename="../qml/pages/RecordPage.qml" line="26"/>
+        <source>Уровень сигнала</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/RecordPage.qml" line="32"/>
         <source>Стоп</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/RecordPage.qml" line="33"/>
+        <location filename="../qml/pages/RecordPage.qml" line="32"/>
         <source>Старт</source>
         <translation type="unfinished"></translation>
     </message>

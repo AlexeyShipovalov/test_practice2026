@@ -10,5 +10,4 @@ class DictaphoneSTTConan(ConanFile):
     requires = (
         "kissfft/131.1.0@aurora",
         "onnxruntime/1.18.1@aurora",
-        "libcurl/8.10.1@aurora",
     )

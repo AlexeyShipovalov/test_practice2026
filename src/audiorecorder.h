@@ -1,8 +1,7 @@
 #pragma once
 #include <QObject>
 #include <QAudioRecorder>
-
-class QTimer;
+#include <QTimer>
 
 class AudioRecorder : public QObject
 {
@@ -12,6 +11,7 @@ class AudioRecorder : public QObject
     Q_PROPERTY(int level READ level NOTIFY levelChanged)
 public:
     explicit AudioRecorder(QObject *parent = nullptr);
+
     bool recording() const { return m_recording; }
     QString duration() const { return m_duration; }
     int level() const { return m_level; }
@@ -30,10 +30,8 @@ private slots:
 private:
     QAudioRecorder *m_recorder;
     QTimer *m_levelTimer;
-    QTimer *m_mockDurationTimer; // <--- Добавлено
     bool m_recording = false;
     QString m_duration = "00:00";
     int m_level = 0;
-    int m_mockSeconds = 0;
     QString m_currentFile;
 };

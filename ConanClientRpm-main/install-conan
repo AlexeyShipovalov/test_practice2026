@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2024 Open Mobile Platform LLC <community@omp.ru>
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Script installs conan into the build environment and configures
+# it to connect to conan repository hosted by OMP.
+#
+# Script is meant to be run inside the build environment.
+#
+# 1. Download the archive that contains the script and RPM files.
+# 2. Extract archive.
+# 3. Run installation script.
+#
+
+from os import listdir, makedirs
+from os.path import abspath, dirname, isfile, join, expanduser
+import re
+import subprocess
+import sys
+import shutil
+
+
+CONAN_PACKAGE_PATTERN = r"^conan-.*-\d*\.(.*)\.rpm$"
+KNOWN_ARCHS = ["aarch64", "armv7hl", "x86_64", "i486"]
+SCRIPT_DIRECTORY = dirname(abspath(__file__))
+CONAN_EXEC_NAME = "conan-with-aurora-profile"
+
+
+def main():
+    if not check_sb2():
+        print(
+            "This script should be run inside the Aurora Build Engine "
+            + "or in Aurora Platform SDK",
+            file=sys.stderr,
+        )
+        return 1
+
+    targets = find_targets(KNOWN_ARCHS)
+    if len(targets) == 0:
+        print("No targets found", file=sys.stderr)
+        return 1
+
+    instal_and_configure_conan_home_dirs(KNOWN_ARCHS)
+
+    conan_packages = find_conan_packages()
+    if len(conan_packages) == 0:
+        print("No conan packages found", file=sys.stderr)
+        return 1
+
+    installation_result = install_packages(targets, conan_packages)
+    if len(installation_result) != 0:
+        print("There were errors during installation", file=sys.stderr)
+        for arch in installation_result:
+            print(f"Error installing in {arch}", file=sys.stderr)
+            print(installation_result, file=sys.stderr)
+        return 1
+
+    print("Conan has been installed and configured")
+    return 0
+
+
+def check_sb2() -> bool:
+    result = subprocess.run(["which", "sb2-config"], capture_output=True)
+    return result.returncode == 0
+
+
+def find_targets(known_archs) -> dict:
+    result = subprocess.run(["sb2-config", "-f"], capture_output=True)
+    lines = result.stdout.decode("utf-8").splitlines()
+    targets = {}
+    for line in lines:
+        for arch in known_archs:
+            if line.endswith(arch):
+                print(f"Found {line} target for {arch} architecture")
+                if not arch in targets:
+                    targets[arch] = []
+                targets[arch].append(line)
+    return targets
+
+
+def find_conan_packages() -> dict:
+    conan_packages = {}
+    for file in listdir(SCRIPT_DIRECTORY):
+        full_file_path = join(SCRIPT_DIRECTORY, file)
+        match = re.fullmatch(CONAN_PACKAGE_PATTERN, file)
+        if isfile(full_file_path) and match:
+            arch = match.group(1)
+            print(f"Found {file} package for {arch} architecture")
+            conan_packages[arch] = full_file_path
+    return conan_packages
+
+
+def install_packages(targets, conan_packages) -> dict:
+    result = {}
+    for arch in targets:
+        if arch not in conan_packages:
+            result[arch] = f"No package found for architecture '{arch}'"
+            continue
+
+        package = conan_packages[arch]
+        for target in targets[arch]:
+            print(f"Installing package {package} into target {target}")
+            try:
+                print("Refreshing package cache")
+                subprocess.run(
+                    ["sb2", "-t", target, "-R", "zypper", "refresh"],
+                    capture_output=True,
+                    check=True,
+                )
+                print("Installing package")
+                subprocess.run(
+                    ["sb2", "-t", target, "-R", "zypper", "install", "-y", package],
+                    capture_output=True,
+                    check=True,
+                )
+            except subprocess.CalledProcessError as error:
+                result[target] = error.output
+    return result
+
+
+def instal_and_configure_conan_home_dirs(known_archs):
+    for arch in known_archs:
+        conan_home_dir_path = join(expanduser("~"), f".conan-{arch}")
+        makedirs(conan_home_dir_path, exist_ok=True)
+        shutil.copy(join(SCRIPT_DIRECTORY, "global.conf"), conan_home_dir_path)
+        shutil.copy(join(SCRIPT_DIRECTORY, "remotes.json"), conan_home_dir_path)
+        conan_profile_path = join(conan_home_dir_path, "profiles")
+        makedirs(conan_profile_path, exist_ok=True)
+        shutil.copy(
+            join(SCRIPT_DIRECTORY, "profiles", arch),
+            join(conan_profile_path, "default"),
+        )
+
+
+if __name__ == "__main__":
+    sys.exit(main())

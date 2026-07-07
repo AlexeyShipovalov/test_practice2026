@@ -1,8 +1,8 @@
-#include <auroraapp.h>
 #include <QtQuick>
 #include "audiorecorder.h"
-#include "transcriptioncontroller.h"
 #include "notesmodel.h"
+#include "transcriptioncontroller.h"
+#include <auroraapp.h>
 
 int main(int argc, char *argv[])
 {
@@ -10,19 +10,21 @@ int main(int argc, char *argv[])
     application->setOrganizationName(QStringLiteral("ru.repeater"));
     application->setApplicationName(QStringLiteral("repeater"));
 
-    // Регистрация C++ объектов в QML как контекстные свойства
-    AudioRecorder audioRecorder;
-    NotesModel notesModel;
-    TranscriptionController sttController;
+    // СОЗДАЕМ В КУЧЕ! И передаем приложение как parent, чтобы Qt сам удалил их при выходе
+    AudioRecorder *audioRecorder = new AudioRecorder(application.data());
+    NotesModel *notesModel = new NotesModel(application.data());
+    TranscriptionController *sttController = new TranscriptionController(application.data());
 
-    // Подключение сигналов: STT расшифровал текст -> Модель добавляет заметку
-    QObject::connect(&sttController, &TranscriptionController::transcriptionFinished,
-                     &notesModel, &NotesModel::addNoteFromTranscription);
+    // Подключение сигналов
+    QObject::connect(sttController,
+                     &TranscriptionController::transcriptionFinished,
+                     notesModel,
+                     &NotesModel::addNoteFromTranscription);
 
     QScopedPointer<QQuickView> view(Aurora::Application::createView());
-    view->rootContext()->setContextProperty(QStringLiteral("audioRecorder"), &audioRecorder);
-    view->rootContext()->setContextProperty(QStringLiteral("notesModel"), &notesModel);
-    view->rootContext()->setContextProperty(QStringLiteral("sttController"), &sttController);
+    view->rootContext()->setContextProperty(QStringLiteral("audioRecorder"), audioRecorder);
+    view->rootContext()->setContextProperty(QStringLiteral("notesModel"), notesModel);
+    view->rootContext()->setContextProperty(QStringLiteral("sttController"), sttController);
 
     view->setSource(Aurora::Application::pathTo(QStringLiteral("qml/repeater.qml")));
     view->show();

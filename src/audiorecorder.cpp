@@ -1,13 +1,14 @@
 #include "audiorecorder.h"
-#include <QStandardPaths>
 #include <QDateTime>
 #include <QDir>
-#include <QUrl>
+#include <QStandardPaths>
 #include <QTimer>
+#include <QUrl>
 #include <cstdlib> // <--- Используем стандартный rand()
 
-AudioRecorder::AudioRecorder(QObject *parent) : QObject(parent),
-    m_recorder(new QAudioRecorder(this))
+AudioRecorder::AudioRecorder(QObject *parent)
+    : QObject(parent)
+    , m_recorder(new QAudioRecorder(this))
 {
     connect(m_recorder, &QAudioRecorder::durationChanged, this, &AudioRecorder::updateDuration);
 
@@ -25,7 +26,8 @@ void AudioRecorder::startRecording()
 {
     QString dataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(dataDir);
-    m_currentFile = dataDir + "/" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss") + ".wav";
+    m_currentFile = dataDir + "/" + QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss")
+                    + ".wav";
 
     QAudioEncoderSettings settings;
     settings.setCodec("audio/pcm");

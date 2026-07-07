@@ -1,7 +1,7 @@
 #include "wavparser.h"
-#include <QFile>
 #include <QDataStream>
 #include <QDebug>
+#include <QFile>
 
 WavData WavParser::parse(const QString &filePath)
 {
@@ -35,7 +35,8 @@ WavData WavParser::parse(const QString &filePath)
             stream >> data.sampleRate;
             stream.skipRawData(6);
             stream >> data.bitsPerSample;
-            if (chunkSize > 16) stream.skipRawData(chunkSize - 16);
+            if (chunkSize > 16)
+                stream.skipRawData(chunkSize - 16);
         } else if (memcmp(chunkId, "data", 4) == 0) {
             int totalSamples = chunkSize / (data.bitsPerSample / 8);
             data.samples.resize(totalSamples);
@@ -59,7 +60,8 @@ WavData WavParser::parse(const QString &filePath)
 QVector<WavData> WavParser::chunkAudio(const WavData &data, int chunkSizeMs)
 {
     QVector<WavData> chunks;
-    if (data.sampleRate <= 0) return chunks;
+    if (data.sampleRate <= 0)
+        return chunks;
 
     int samplesPerChunk = data.sampleRate * (chunkSizeMs / 1000.0);
     int totalChunks = (data.samples.size() + samplesPerChunk - 1) / samplesPerChunk;

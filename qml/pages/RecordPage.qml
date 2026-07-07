@@ -5,7 +5,6 @@ Page {
     id: recordPage
     allowedOrientations: Orientation.All
 
-
     Column {
         id: column
         width: parent.width
@@ -24,7 +23,7 @@ Page {
             minimumValue: 0
             maximumValue: 100
             value: audioRecorder.level
-            label: "Уровень сигнала"
+            label: qsTr("Уровень сигнала")
         }
 
         Button {
@@ -33,25 +32,16 @@ Page {
             text: audioRecorder.recording ? qsTr("Стоп") : qsTr("Старт")
             preferredWidth: Theme.buttonWidthLarge
             color: audioRecorder.recording ? "red" : Theme.primaryColor
+
             onClicked: {
                 if (audioRecorder.recording) {
                     var path = audioRecorder.stopRecording()
                     sttController.startTranscription(path, "Новая лекция")
+                    // Возвращаемся на главную, где увидим прогресс расшифровки
                     pageStack.pop()
                 } else {
                     audioRecorder.startRecording()
                 }
-            }
-        }
-    }
-
-    // Индикатор фоновой расшифровки (если только что записали)
-    Connections {
-        target: sttController
-        onTranscribingChanged: {
-            if (sttController.isTranscribing) {
-                appWindow.activate()
-                // В реальном приложении здесь можно показать RemorsePopup
             }
         }
     }
