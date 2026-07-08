@@ -35,3 +35,6 @@ models.path = /usr/share/$$TARGET/models
 models.files = models/*
 INSTALLS += models
 
+testaudio.path = /usr/share/$$TARGET/test_audio
+testaudio.files = test_audio/*
+INSTALLS += testaudio

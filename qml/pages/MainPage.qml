@@ -15,6 +15,16 @@ Page {
                 text: qsTr("Новая запись")
                 onClicked: pageStack.push(Qt.resolvedUrl("RecordPage.qml"))
             }
+            MenuItem {
+                    text: qsTr("Тест: расшифровать встроенный аудио")
+                    onClicked: {
+                        // Вызываем C++ метод напрямую, минуя рекордер!
+                        sttController.startTranscription(
+                            "/usr/share/ru.repeater.repeater/test_audio/test.wav",
+                            "Тестовая расшифровка"
+                        )
+                    }
+                }
 
         }
 

@@ -65,6 +65,10 @@ void SttWorker::loadModel(const QString &modelPath)
     } catch (const Ort::Exception &e) {
         emit modelLoaded(false, timer.elapsed(), QString(e.what()));
     }
+    qDebug() << "Mel-фильтры загружены, количество строк (должно быть 64):" << m_melFilters.size();
+    if (!m_melFilters.empty()) {
+        qDebug() << "Размер первого фильтра (должно быть 257):" << m_melFilters[0].size();
+    }
 }
 
 // Чтение WAV (только 16-bit PCM)
@@ -96,7 +100,7 @@ std::vector<float> SttWorker::readWavFile(const QString &filePath, int &sampleRa
 std::vector<float> SttWorker::computeMelSpectrogram(const std::vector<float>& audio) {
     const int fftSize = 512;
     const int hopSize = 160;
-    const int nMels = 64; // GigaAM использует 64!
+    const int nMels = 64;
 
     int padSize = fftSize / 2;
     std::vector<float> paddedAudio(padSize + audio.size() + padSize, 0.0f);
@@ -137,11 +141,34 @@ std::vector<float> SttWorker::computeMelSpectrogram(const std::vector<float>& au
     }
     kiss_fft_free(cfg);
 
-    // Для ONNX [1, nMels, time] нам не нужен transpose, melData уже имеет нужную структуру
+    // === КРИТИЧЕСКИ ВАЖНО: Нормализация CMVN ===
+    // NeMo Conformer требует, чтобы каждый mel-бин имел среднее=0 и стд=1
+    for (int m = 0; m < nMels; ++m) {
+        // 1. Считаем среднее (Mean)
+        float sum = 0.0f;
+        for (int t = 0; t < numFrames; ++t) {
+            sum += melData[m * numFrames + t];
+        }
+        float mean = sum / numFrames;
+
+        // 2. Считаем стандартное отклонение (Std)
+        float varSum = 0.0f;
+        for (int t = 0; t < numFrames; ++t) {
+            float diff = melData[m * numFrames + t] - mean;
+            varSum += diff * diff;
+        }
+        float std = sqrtf(varSum / numFrames) + 1e-5f; // +1e-5 чтобы не делить на 0
+
+        // 3. Нормализуем: (значение - среднее) / стд
+        for (int t = 0; t < numFrames; ++t) {
+            melData[m * numFrames + t] = (melData[m * numFrames + t] - mean) / std;
+        }
+    }
+
     return melData;
 }
 
-// Декодирование CTC (Greedy)
+// Декодирование CTC (Greedy) с пост-процессингом
 QString SttWorker::decodeCtc(const Ort::Value& logits) {
     auto tensorInfo = logits.GetTensorTypeAndShapeInfo();
     auto shape = tensorInfo.GetShape();
@@ -164,6 +191,7 @@ QString SttWorker::decodeCtc(const Ort::Value& logits) {
             }
         }
 
+        // CTC правила: убираем blanks (обычно 0) и повторы
         if (maxIdx != 0 && maxIdx != prevToken) {
             if (maxIdx < m_vocab.size()) {
                 result += m_vocab[maxIdx];
@@ -171,7 +199,38 @@ QString SttWorker::decodeCtc(const Ort::Value& logits) {
         }
         prevToken = maxIdx;
     }
-    return result;
+
+    // === ПОСТ-ПРОЦЕССИНГ ТЕКСТА ===
+
+    // 1. Заменяем символы пробела SentencePiece (▁) на обычные пробелы
+    result.replace("▁", " ");
+
+    // 2. Убираем лишние пробелы перед знаками препинания (если модель их выдает)
+    result.replace(" ,", ",");
+    result.replace(" .", ".");
+    result.replace(" !", "!");
+    result.replace(" ?", "?");
+
+    // 3. Капитализация первой буквы всего текста
+    if (!result.isEmpty()) {
+        result[0] = result[0].toUpper();
+    }
+
+    // 4. Капитализация после знаков конца предложения (. ! ?)
+    for (int i = 1; i < result.length() - 1; ++i) {
+        if (result[i] == '.' || result[i] == '!' || result[i] == '?') {
+            // Ищем следующую букву
+            int j = i + 1;
+            while (j < result.length() && result[j].isSpace()) {
+                j++;
+            }
+            if (j < result.length() && result[j].isLetter()) {
+                result[j] = result[j].toUpper();
+            }
+        }
+    }
+
+    return result.trimmed();
 }
 
 void SttWorker::processAudio(const QString &audioPath)
