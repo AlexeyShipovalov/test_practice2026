@@ -22,52 +22,57 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="24"/>
+        <location filename="../qml/pages/MainPage.qml" line="34"/>
         <source>Мои заметки</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="40"/>
+        <location filename="../qml/pages/MainPage.qml" line="50"/>
         <source>Модель речи готова</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="32"/>
+        <location filename="../qml/pages/MainPage.qml" line="42"/>
         <source>Загрузка модели...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="45"/>
+        <location filename="../qml/pages/MainPage.qml" line="19"/>
+        <source>Тест: расшифровать встроенный аудио</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../qml/pages/MainPage.qml" line="55"/>
         <source>Ошибка: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="53"/>
+        <location filename="../qml/pages/MainPage.qml" line="63"/>
         <source>Поиск по тексту...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="59"/>
+        <location filename="../qml/pages/MainPage.qml" line="69"/>
         <source>Заметок нет</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="60"/>
+        <location filename="../qml/pages/MainPage.qml" line="70"/>
         <source>Создайте новую запись</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="74"/>
+        <location filename="../qml/pages/MainPage.qml" line="84"/>
         <source>Удалить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="133"/>
+        <location filename="../qml/pages/MainPage.qml" line="143"/>
         <source>Расшифровка записи...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../qml/pages/MainPage.qml" line="146"/>
+        <location filename="../qml/pages/MainPage.qml" line="156"/>
         <source>Отменить</source>
         <translation type="unfinished"></translation>
     </message>

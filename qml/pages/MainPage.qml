@@ -15,6 +15,7 @@ Page {
                 text: qsTr("Новая запись")
                 onClicked: pageStack.push(Qt.resolvedUrl("RecordPage.qml"))
             }
+
         }
 
         header: Column {
@@ -42,7 +43,7 @@ Page {
                     }
                 }
                 onErrorOccurred: {
-                    modelStatusLabel.text = qsTr("Ошибка: ") + err
+                    modelStatusLabel.text = qsTr("Ошибка: ") + error
                     modelStatusLabel.color = "red"
                 }
             }
